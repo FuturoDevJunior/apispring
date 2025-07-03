@@ -70,7 +70,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [20.19.1]
+        node: [20.19.3]
     
     steps:
     - name: Checkout código
@@ -94,7 +94,7 @@ jobs:
     - name: Instalar dependências
       run: |
         cd creditos-api/frontend/creditos-ui
-        npm ci
+        HUSKY_SKIP_INSTALL=1 npm ci
         
     - name: Verificar versão Angular CLI disponível
       run: |
@@ -223,7 +223,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 20.19.1
+        node-version: 20.19.3
         cache: 'npm'
         cache-dependency-path: creditos-api/frontend/creditos-ui/package-lock.json
         

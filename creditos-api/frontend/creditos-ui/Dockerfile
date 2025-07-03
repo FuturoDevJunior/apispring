@@ -1,22 +1,15 @@
-# Dockerfile para o Frontend Angular
-
-# Estágio 1 - Build
-FROM node:20.19.1-alpine AS build
-
+# ----- stage 1: build Angular -----
+FROM node:20.19-alpine AS build
 WORKDIR /app
 
-# Evita scripts Husky que dependem de .git
-ENV HUSKY=0
-
-# Dependências primeiro para cache
+# caching de dependências
 COPY package*.json ./
-RUN npm ci --omit=dev
+# ① pula scripts pós-install (husky) ② omite devDeps
+RUN npm ci --omit=dev --ignore-scripts
 
-# Copiar código fonte
+# copia código, compila produção
 COPY . .
-
-# Build de produção
-RUN npx -y @angular/cli@20.0.5 build --configuration production
+RUN npx ng build --configuration production
 
 # Estágio 2 - Servidor Nginx para servir o aplicativo
 FROM nginx:alpine
