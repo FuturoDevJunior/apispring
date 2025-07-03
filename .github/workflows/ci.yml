@@ -162,8 +162,9 @@ jobs:
         context: ./creditos-api/backend
         file: ./creditos-api/backend/Dockerfile
         push: true
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
+        tags: ghcr.io/futurodevjunior/apispring:${{ github.sha }}
+        provenance: false
+        outputs: type=registry
         cache-from: type=gha
         cache-to: type=gha,mode=max
         
@@ -179,6 +180,8 @@ jobs:
         file: ./creditos-api/frontend/creditos-ui/Dockerfile
         push: true
         tags: ghcr.io/futurodevjunior/apispring-ui:${{ github.sha }}
+        provenance: false
+        outputs: type=registry
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
@@ -186,13 +189,22 @@ jobs:
     runs-on: ubuntu-latest
     needs: [docker-build]
     if: github.ref == 'refs/heads/main'
+    permissions:
+      security-events: write
+      contents: read
     
     steps:
     - name: Checkout código
       uses: actions/checkout@v4
       
+    - name: Download Trivy cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/trivy
+        key: ${{ runner.os }}-trivy-db
+        
     - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@master
+      uses: aquasecurity/trivy-action@0.20.0
       with:
         image-ref: ghcr.io/futurodevjunior/apispring:${{ github.sha }}
         format: 'sarif'
