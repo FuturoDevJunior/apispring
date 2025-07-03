@@ -34,15 +34,9 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
         
-    - name: Executar testes backend
-      run: |
-        cd creditos-api/backend/creditos-api
-        ./mvnw clean verify
-        
-    - name: Verificar cobertura JaCoCo
-      run: |
-        cd creditos-api/backend/creditos-api
-        ./mvnw jacoco:check
+    - name: Executar testes backend + JaCoCo
+      working-directory: creditos-api/backend/creditos-api
+      run: ./mvnw -B clean verify
         
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
