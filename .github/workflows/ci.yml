@@ -83,6 +83,14 @@ jobs:
         cache: 'npm'
         cache-dependency-path: creditos-api/frontend/creditos-ui/package-lock.json
         
+    - name: Cache NPM e node_modules
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.npm
+          creditos-api/frontend/creditos-ui/node_modules
+        key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+        
     - name: Instalar dependências
       run: |
         cd creditos-api/frontend/creditos-ui

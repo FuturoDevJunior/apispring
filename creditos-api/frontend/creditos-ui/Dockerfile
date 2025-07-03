@@ -8,13 +8,15 @@ WORKDIR /app
 # Evita scripts Husky que dependem de .git
 ENV HUSKY=0
 
-# Copiar arquivos necessários e instalar dependências
+# Dependências primeiro para cache
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --omit=dev
 
-# Copiar todo o código da aplicação e criar build de produção
+# Copiar código fonte
 COPY . .
-RUN npx ng build --configuration production
+
+# Build de produção
+RUN npx -y @angular/cli@20.0.5 build --configuration production
 
 # Estágio 2 - Servidor Nginx para servir o aplicativo
 FROM nginx:alpine
