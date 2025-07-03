@@ -1,11 +1,19 @@
 # Changelog
 
-Todas as mudanças notáveis deste projeto serão documentadas neste arquivo.
+Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
-O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
+O formato é baseado em [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0] - 2025-07-02
+## [Unreleased]
+
+### Fixed
+- CI/CD pipeline Docker build paths corrected for frontend and backend
+- Repository name normalization for GHCR OCI compliance
+- Angular CLI command resolution with npx fallback
+- GitHub Actions updated to latest stable versions
+- Container registry permissions and authentication
+- Bundle size validation and artifact upload
 
 ### 🎯 Sprint 6 - Finalização e Entrega
 - **Observabilidade**: Actuator endpoints habilitados (/health, /metrics)
