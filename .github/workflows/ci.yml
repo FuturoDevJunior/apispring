@@ -179,6 +179,7 @@ jobs:
         context: ./creditos-api/frontend/creditos-ui
         file: ./creditos-api/frontend/creditos-ui/Dockerfile
         push: true
+        platforms: linux/amd64
         tags: ghcr.io/futurodevjunior/apispring-ui:${{ github.sha }}
         provenance: false
         outputs: type=registry
