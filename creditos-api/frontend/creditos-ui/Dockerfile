@@ -4,8 +4,8 @@ WORKDIR /app
 
 # caching de dependências
 COPY package*.json ./
-# ① pula scripts pós-install (husky) ② omite devDeps
-RUN npm ci --omit=dev --ignore-scripts
+# Instala dependências sem scripts pós-install
+RUN npm ci --ignore-scripts
 
 # copia código, compila produção
 COPY . .
