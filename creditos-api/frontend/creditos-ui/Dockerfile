@@ -7,11 +7,11 @@ WORKDIR /app
 
 # Copiar arquivos necessários e instalar dependências
 COPY package*.json ./
-RUN npm install -g @angular/cli@20.0.6 && npm install
+RUN npm ci
 
 # Copiar todo o código da aplicação e criar build de produção
 COPY . .
-RUN ng build --configuration production
+RUN npx ng build --configuration production
 
 # Estágio 2 - Servidor Nginx para servir o aplicativo
 FROM nginx:alpine

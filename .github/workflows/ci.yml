@@ -88,15 +88,10 @@ jobs:
         cd creditos-api/frontend/creditos-ui
         npm ci
         
-    - name: Instalar Angular CLI
+    - name: Verificar versão Angular CLI disponível
       run: |
         cd creditos-api/frontend/creditos-ui
-        npm install -g @angular/cli@20 || echo "Global install failed, will use npx"
-        
-    - name: Verificar versão Angular
-      run: |
-        cd creditos-api/frontend/creditos-ui
-        ng version || npx @angular/cli@20 version
+        npx @angular/cli version
         
     - name: Executar lint
       run: |
