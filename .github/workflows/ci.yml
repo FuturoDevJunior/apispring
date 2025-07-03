@@ -83,10 +83,21 @@ jobs:
         cd creditos-api/frontend/creditos-ui
         npm run lint
         
+    - name: Verificar versão Angular
+      run: |
+        cd creditos-api/frontend/creditos-ui
+        ng version
+        
     - name: Build produção
       run: |
         cd creditos-api/frontend/creditos-ui
         npm run build -- --configuration production --no-progress
+        
+    - name: Upload frontend build artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: frontend-build
+        path: creditos-api/frontend/creditos-ui/dist/creditos-ui
         
     - name: Verificar tamanho do bundle
       run: |
