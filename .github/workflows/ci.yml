@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ main ]
 
+defaults:
+  run:
+    shell: bash
+
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}/creditos-api
@@ -94,7 +98,7 @@ jobs:
         npm run build -- --configuration production --no-progress
         
     - name: Upload frontend build artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: frontend-build
         path: creditos-api/frontend/creditos-ui/dist/creditos-ui
