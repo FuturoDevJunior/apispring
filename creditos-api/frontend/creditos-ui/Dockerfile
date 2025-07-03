@@ -1,9 +1,12 @@
 # Dockerfile para o Frontend Angular
 
 # Estágio 1 - Build
-FROM node:20.14.0-alpine AS build
+FROM node:20.19.1-alpine AS build
 
 WORKDIR /app
+
+# Evita scripts Husky que dependem de .git
+ENV HUSKY=0
 
 # Copiar arquivos necessários e instalar dependências
 COPY package*.json ./

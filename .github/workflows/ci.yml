@@ -70,7 +70,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [20]
+        node: [20.19.1]
     
     steps:
     - name: Checkout código
@@ -103,11 +103,11 @@ jobs:
         cd creditos-api/frontend/creditos-ui
         ng build --configuration production --no-progress || npx @angular/cli@20 build --configuration production --no-progress
         
-    - name: Upload frontend build artifact
+    - name: Upload dist artefact
       uses: actions/upload-artifact@v4
       with:
-        name: frontend-build
-        path: creditos-api/frontend/creditos-ui/dist/creditos-ui
+        name: ui-dist
+        path: creditos-api/frontend/creditos-ui/dist
         
     - name: Verificar tamanho do bundle
       run: |
@@ -170,7 +170,7 @@ jobs:
         context: ./creditos-api/frontend/creditos-ui
         file: ./creditos-api/frontend/creditos-ui/Dockerfile
         push: true
-        tags: ${{ env.REGISTRY }}/${{ steps.vars.outputs.repo_lc }}-ui:${{ github.sha }}
+        tags: ghcr.io/futurodevjunior/apispring-ui:${{ github.sha }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
@@ -215,7 +215,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 20
+        node-version: 20.19.1
         cache: 'npm'
         cache-dependency-path: creditos-api/frontend/creditos-ui/package-lock.json
         
