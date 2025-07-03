@@ -82,20 +82,25 @@ jobs:
         cd creditos-api/frontend/creditos-ui
         npm ci
         
-    - name: Executar lint
+    - name: Instalar Angular CLI
       run: |
         cd creditos-api/frontend/creditos-ui
-        npm run lint
+        npm install -g @angular/cli@20
         
     - name: Verificar versão Angular
       run: |
         cd creditos-api/frontend/creditos-ui
         ng version
         
+    - name: Executar lint
+      run: |
+        cd creditos-api/frontend/creditos-ui
+        npm run lint
+        
     - name: Build produção
       run: |
         cd creditos-api/frontend/creditos-ui
-        npm run build -- --configuration production --no-progress
+        ng build --configuration production --no-progress
         
     - name: Upload frontend build artifact
       uses: actions/upload-artifact@v4
