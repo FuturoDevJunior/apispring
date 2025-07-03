@@ -1,0 +1,68 @@
+# Build outputs
+target/
+dist/
+build/
+out/
+
+# Dependencies
+node_modules/
+.npm/
+
+# IDE
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Docker volumes
+pgdata*/
+pgdata17
+data/
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Maven
+.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.properties
+
+# Angular
+.angular/
+coverage/
+
+# Spring Boot
+application-*.properties
+application-*.yml
+!application.yml
+!application-dev.yml
+
+# JaCoCo
+jacoco.exec
+*.exec
+
+# Test results
+TEST-*.xml
+surefire-reports/

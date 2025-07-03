@@ -1,0 +1,144 @@
+<mat-card class="resultado-container">
+  <mat-card-header>
+    <mat-card-title class="titulo-resultados">
+      <mat-icon>credit_card</mat-icon>
+      Resultados da Consulta
+    </mat-card-title>
+    <mat-card-subtitle *ngIf="creditos.length > 0">
+      {{ creditos.length }} crédito(s) encontrado(s)
+    </mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+    <!-- Estado de Loading -->
+    <div *ngIf="loading" class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Carregando dados...</p>
+    </div>
+
+    <!-- Estado de Erro -->
+    <div *ngIf="erro && !loading" class="erro-container">
+      <mat-icon color="warn">error</mat-icon>
+      <h3>Erro ao carregar dados</h3>
+      <p>{{ erro }}</p>
+    </div>
+
+    <!-- Tabela de Resultados -->
+    <div *ngIf="!loading && !erro && creditos.length > 0" class="tabela-container">
+      <div class="acoes-toolbar">
+        <button mat-raised-button color="primary" (click)="exportarDados()">
+          <mat-icon>download</mat-icon>
+          Exportar Dados
+        </button>
+      </div>
+
+      <mat-table [dataSource]="creditos" matSort class="creditos-table">
+        <!-- Coluna NFS-e -->
+        <ng-container matColumnDef="numeroNfse">
+          <mat-header-cell *matHeaderCellDef mat-sort-header>NFS-e</mat-header-cell>
+          <mat-cell *matCellDef="let credito">
+            <span class="numero-documento">{{ credito.numeroNfse }}</span>
+          </mat-cell>
+        </ng-container>
+
+        <!-- Coluna Número do Crédito -->
+        <ng-container matColumnDef="numeroCredito">
+          <mat-header-cell *matHeaderCellDef mat-sort-header>Número do Crédito</mat-header-cell>
+          <mat-cell *matCellDef="let credito">
+            <span class="numero-documento">{{ credito.numeroCredito }}</span>
+          </mat-cell>
+        </ng-container>
+
+        <!-- Coluna Contribuinte -->
+        <ng-container matColumnDef="contribuinte">
+          <mat-header-cell *matHeaderCellDef mat-sort-header>Contribuinte</mat-header-cell>
+          <mat-cell *matCellDef="let credito">
+            <span class="contribuinte-nome">{{ credito.contribuinte }}</span>
+          </mat-cell>
+        </ng-container>
+
+        <!-- Coluna Data de Vencimento -->
+        <ng-container matColumnDef="dataVencimento">
+          <mat-header-cell *matHeaderCellDef mat-sort-header>Vencimento</mat-header-cell>
+          <mat-cell *matCellDef="let credito">
+            <span 
+              [class.vencido]="isVencido(credito.dataVencimento)"
+              class="data-vencimento">
+              {{ formatarData(credito.dataVencimento) }}
+            </span>
+            <mat-icon 
+              *ngIf="isVencido(credito.dataVencimento)" 
+              color="warn" 
+              class="icone-vencido"
+              matTooltip="Crédito vencido">
+              warning
+            </mat-icon>
+          </mat-cell>
+        </ng-container>
+
+        <!-- Coluna Valor -->
+        <ng-container matColumnDef="valor">
+          <mat-header-cell *matHeaderCellDef mat-sort-header>Valor</mat-header-cell>
+          <mat-cell *matCellDef="let credito">
+            <div class="valor-container">
+              <span class="valor-principal">{{ formatarMoeda(credito.valor) }}</span>
+              <span *ngIf="credito.valorTotal && credito.valorTotal !== credito.valor" 
+                    class="valor-total">
+                Total: {{ formatarMoeda(credito.valorTotal) }}
+              </span>
+            </div>
+          </mat-cell>
+        </ng-container>
+
+        <!-- Coluna Status -->
+        <ng-container matColumnDef="status">
+          <mat-header-cell *matHeaderCellDef mat-sort-header>Status</mat-header-cell>
+          <mat-cell *matCellDef="let credito">
+            <mat-chip-set>
+              <mat-chip [color]="getStatusColor(credito.status)" selected>
+                <mat-icon matChipAvatar>{{ getStatusIcon(credito.status) }}</mat-icon>
+                {{ credito.status }}
+              </mat-chip>
+            </mat-chip-set>
+          </mat-cell>
+        </ng-container>
+
+        <!-- Coluna Ações -->
+        <ng-container matColumnDef="acoes">
+          <mat-header-cell *matHeaderCellDef>Ações</mat-header-cell>
+          <mat-cell *matCellDef="let credito">
+            <button 
+              mat-icon-button 
+              (click)="visualizarDetalhes(credito)"
+              matTooltip="Visualizar detalhes">
+              <mat-icon>visibility</mat-icon>
+            </button>
+            <button 
+              mat-icon-button 
+              (click)="baixarComprovante(credito)"
+              matTooltip="Baixar comprovante"
+              [disabled]="credito.status !== 'PAGO'">
+              <mat-icon>download</mat-icon>
+            </button>
+          </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+      </mat-table>
+
+      <mat-paginator 
+        [pageSizeOptions]="[5, 10, 20, 50]" 
+        showFirstLastButtons
+        aria-label="Selecionar página dos créditos">
+      </mat-paginator>
+    </div>
+
+    <!-- Estado Vazio -->
+    <div *ngIf="!loading && !erro && creditos.length === 0" class="vazio-container">
+      <mat-icon class="icone-vazio">search_off</mat-icon>
+      <h3>Nenhum resultado encontrado</h3>
+      <p>Tente ajustar os parâmetros de busca ou verifique se os dados estão corretos.</p>
+    </div>
+  </mat-card-content>
+</mat-card>

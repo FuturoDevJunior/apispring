@@ -1,0 +1,84 @@
+.consulta-card {
+  max-width: 600px;
+  margin: 20px auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  
+  mat-card-header {
+    margin-bottom: 20px;
+    
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #1976d2;
+      
+      mat-icon {
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+      }
+    }
+  }
+}
+
+.form-group {
+  margin-bottom: 16px;
+  
+  .full-width {
+    width: 100%;
+  }
+  
+  .radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+    
+    mat-radio-button {
+      margin-bottom: 8px;
+    }
+  }
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-start;
+  margin-top: 24px;
+  
+  .consultar-btn {
+    min-width: 140px;
+    
+    mat-icon {
+      margin-right: 8px;
+    }
+  }
+  
+  .limpar-btn {
+    mat-icon {
+      margin-right: 8px;
+    }
+  }
+}
+
+// Responsividade
+@media (max-width: 768px) {
+  .consulta-card {
+    margin: 10px;
+    max-width: none;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+    
+    button {
+      width: 100%;
+    }
+  }
+  
+  .radio-group {
+    flex-direction: row;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+}

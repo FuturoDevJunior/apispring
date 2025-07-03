@@ -1,0 +1,225 @@
+.consulta-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  
+  .header-toolbar {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    
+    .spacer {
+      flex: 1 1 auto;
+    }
+    
+    mat-icon {
+      margin-right: 8px;
+      
+      &:last-child {
+        margin-right: 0;
+        margin-left: 8px;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+        
+        &:hover {
+          transform: scale(1.1);
+        }
+      }
+    }
+    
+    span {
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+  }
+  
+  .content-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+    
+    @media (max-width: 768px) {
+      padding: 16px;
+    }
+  }
+  
+  .formulario-card {
+    margin-bottom: 24px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    
+    mat-card-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 24px;
+      margin: -24px -24px 24px -24px;
+      
+      mat-card-title {
+        display: flex;
+        align-items: center;
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+        
+        mat-icon {
+          margin-right: 12px;
+          font-size: 1.8rem;
+          width: 24px;
+          height: 24px;
+        }
+      }
+      
+      mat-card-subtitle {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1rem;
+        margin: 0;
+      }
+    }
+    
+    mat-card-content {
+      padding: 24px;
+    }
+    
+    @media (max-width: 768px) {
+      margin-bottom: 16px;
+      
+      mat-card-header {
+        padding: 16px;
+        margin: -16px -16px 16px -16px;
+        
+        mat-card-title {
+          font-size: 1.3rem;
+          
+          mat-icon {
+            font-size: 1.5rem;
+            width: 20px;
+            height: 20px;
+          }
+        }
+        
+        mat-card-subtitle {
+          font-size: 0.9rem;
+        }
+      }
+      
+      mat-card-content {
+        padding: 16px;
+      }
+    }
+  }
+  
+  mat-divider {
+    margin: 32px 0;
+    border-color: rgba(0, 0, 0, 0.12);
+    
+    @media (max-width: 768px) {
+      margin: 24px 0;
+    }
+  }
+  
+  .resultados-section {
+    animation: fadeInUp 0.4s ease-out;
+    
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  }
+}
+
+// Estados de carregamento
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+// Melhorias para o tema Material
+:host ::ng-deep {
+  .mat-mdc-card {
+    --mdc-elevated-card-container-color: #ffffff;
+    --mdc-elevated-card-container-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  }
+  
+  .mat-toolbar {
+    --mat-toolbar-container-background-color: #1976d2;
+    --mat-toolbar-container-text-color: #ffffff;
+  }
+  
+  .mat-mdc-card-header {
+    .mat-mdc-card-title {
+      --mat-card-title-text-color: #ffffff;
+    }
+    
+    .mat-mdc-card-subtitle {
+      --mat-card-subtitle-text-color: rgba(255, 255, 255, 0.9);
+    }
+  }
+  
+  // Responsividade para Material components
+  @media (max-width: 768px) {
+    .mat-toolbar {
+      .mat-toolbar-row {
+        padding: 0 16px;
+      }
+      
+      .mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+    }
+  }
+}
+
+// Animações suaves
+* {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// Scrollbar customizada
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+  
+  &:hover {
+    background: #a8a8a8;
+  }
+}
+
+// Acessibilidade
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+// Modo escuro (preparação para futuras implementações)
+@media (prefers-color-scheme: dark) {
+  .consulta-container {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    color: #ffffff;
+  }
+}

@@ -1,0 +1,197 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/creditos-api
+
+jobs:
+  backend-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [21]
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+      
+    - name: Setup Java JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ matrix.java }}
+        distribution: 'temurin'
+        
+    - name: Cache Maven dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+        
+    - name: Executar testes backend
+      run: |
+        cd creditos-api/backend/creditos-api
+        ./mvnw clean verify
+        
+    - name: Verificar cobertura JaCoCo
+      run: |
+        cd creditos-api/backend/creditos-api
+        ./mvnw jacoco:check
+        
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./creditos-api/backend/creditos-api/target/site/jacoco/jacoco.xml
+        flags: unittests
+        name: codecov-umbrella
+
+  frontend-build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [20]
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node }}
+        cache: 'npm'
+        cache-dependency-path: creditos-api/frontend/creditos-ui/package-lock.json
+        
+    - name: Instalar dependências
+      run: |
+        cd creditos-api/frontend/creditos-ui
+        npm ci
+        
+    - name: Executar lint
+      run: |
+        cd creditos-api/frontend/creditos-ui
+        npm run lint
+        
+    - name: Build produção
+      run: |
+        cd creditos-api/frontend/creditos-ui
+        npm run build -- --configuration production --no-progress
+        
+    - name: Verificar tamanho do bundle
+      run: |
+        cd creditos-api/frontend/creditos-ui
+        ls -lah dist/creditos-ui/
+        find dist/ -name "*.js" -exec gzip -c {} \; | wc -c | awk '{if($1 > 262144) {print "Bundle muito grande: " $1 " bytes"; exit 1} else {print "Bundle OK: " $1 " bytes"}}'
+
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: [backend-test, frontend-build]
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+      
+    - name: Setup Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          
+    - name: Build e push da API
+      uses: docker/build-push-action@v5
+      with:
+        context: ./creditos-api/backend
+        file: ./creditos-api/backend/Dockerfile
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        
+    - name: Build e push do Frontend
+      uses: docker/build-push-action@v5
+      with:
+        context: ./creditos-api/frontend
+        file: ./creditos-api/frontend/Dockerfile
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-ui:${{ github.sha }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  security-scan:
+    runs-on: ubuntu-latest
+    needs: [docker-build]
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+      
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+        exit-code: '1'
+        severity: 'CRITICAL,HIGH'
+        
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+  preflight:
+    runs-on: ubuntu-latest
+    needs: [backend-test, frontend-build]
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+      
+    - name: Setup Java JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: 21
+        distribution: 'temurin'
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: 'npm'
+        cache-dependency-path: creditos-api/frontend/creditos-ui/package-lock.json
+        
+    - name: Setup Docker Compose
+      run: |
+        sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+        sudo chmod +x /usr/local/bin/docker-compose
+        
+    - name: Executar preflight
+      run: |
+        chmod +x ./preflight.sh
+        chmod +x ./wait-for-it.sh
+        ./preflight.sh
