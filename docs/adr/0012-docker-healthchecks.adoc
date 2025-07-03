@@ -1,0 +1,260 @@
+= ADR-0012: Implementação de Docker Healthchecks
+
+**Status:** Aceito +
+**Data:** 2025-07-03 +
+**Autor:** DevFerreiraG
+
+== Contexto
+
+O sistema de consulta de créditos opera em ambiente containerizado com múltiplos serviços (API Spring Boot, PostgreSQL, Kafka). A ausência de healthchecks adequados pode resultar em falhas silenciosas, dificuldade de debugging e problemas de orquestração em ambientes de produção.
+
+== Decisão
+
+Implementaremos **healthchecks nativos Docker** para todos os serviços críticos, garantindo monitoramento proativo e recuperação automática de falhas.
+
+== Alternativas Consideradas
+
+1. **Apenas logs de aplicação** - Reativo, dificulta detecção precoce
+2. **Monitoring externo (Prometheus)** - Complexidade adicional
+3. **Spring Boot Actuator apenas** - Limitado ao contexto da aplicação
+4. **Docker healthchecks nativos** - **ESCOLHIDO**
+
+== Justificativa
+
+=== Vantagens dos Docker Healthchecks
+
+* **Orquestração inteligente:** Docker Compose/Swarm aguarda serviços saudáveis
+* **Recovery automático:** Restart de containers não-saudáveis
+* **Visibilidade:** `docker ps` mostra status de saúde em tempo real
+* **Zero overhead:** Executados pelo daemon Docker
+* **Padronização:** Funciona independente da linguagem/framework
+
+== Implementação por Serviço
+
+=== Spring Boot API
+
+[source,yaml]
+----
+# docker-compose.yml
+services:
+  creditos-api:
+    build: ./creditos-api
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+----
+
+=== PostgreSQL 17
+
+[source,yaml]
+----
+services:
+  postgres:
+    image: postgres:17.5-alpine
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d creditos"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    environment:
+      POSTGRES_DB: creditos
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+----
+
+=== Apache Kafka
+
+[source,yaml]
+----
+services:
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+----
+
+=== Zookeeper (Kafka Dependency)
+
+[source,yaml]
+----
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.0
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "2181"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+----
+
+== Configurações de Tuning
+
+=== Timing Strategies
+
+* **start_period:** Tempo de "grace" antes dos healthchecks iniciarem
+* **interval:** Frequência de verificação (balancear performance vs. detecção)
+* **timeout:** Tempo máximo por verificação
+* **retries:** Tentativas antes de marcar como unhealthy
+
+=== Ambiente de Desenvolvimento
+
+[source,yaml]
+----
+# docker-compose.dev.yml
+services:
+  creditos-api:
+    healthcheck:
+      interval: 15s    # Verificação mais frequente
+      timeout: 5s      # Timeout reduzido
+      start_period: 20s # Start mais rápido
+----
+
+=== Ambiente de Produção
+
+[source,yaml]
+----
+# docker-compose.prod.yml
+services:
+  creditos-api:
+    healthcheck:
+      interval: 60s    # Menos overhead
+      timeout: 30s     # Timeout generoso
+      start_period: 90s # Mais tempo para warm-up
+----
+
+== Integração com Spring Boot Actuator
+
+=== Endpoint Customizado
+
+[source,java]
+----
+@Component
+public class CustomHealthIndicator implements HealthIndicator {
+    
+    @Autowired
+    private KafkaTemplate<String, Object> kafkaTemplate;
+    
+    @Autowired
+    private DataSource dataSource;
+    
+    @Override
+    public Health health() {
+        try {
+            // Verificar conectividade Kafka
+            kafkaTemplate.metrics();
+            
+            // Verificar pool de conexões DB
+            try (Connection conn = dataSource.getConnection()) {
+                conn.isValid(5);
+            }
+            
+            return Health.up()
+                    .withDetail("kafka", "CONNECTED")
+                    .withDetail("database", "CONNECTED")
+                    .withDetail("timestamp", Instant.now())
+                    .build();
+                    
+        } catch (Exception e) {
+            return Health.down()
+                    .withDetail("error", e.getMessage())
+                    .withDetail("timestamp", Instant.now())
+                    .build();
+        }
+    }
+}
+----
+
+== Consequências
+
+=== Positivas
+* **Startup ordenado:** Serviços dependentes aguardam dependencies
+* **Recovery automático:** Containers problemáticos são reiniciados
+* **Debugging facilitado:** Status visível em `docker ps`
+* **CI/CD confiável:** Testes aguardam stack completamente funcional
+
+=== Negativas
+* **Overhead mínimo:** Execução de comandos periódicos
+* **Configuração adicional:** Cada serviço precisa de healthcheck específico
+* **False positives:** Healthchecks podem falhar por sobrecarga temporária
+
+== Monitoramento e Alertas
+
+=== Comandos de Verificação
+
+[source,bash]
+----
+# Status geral dos healthchecks
+docker compose ps
+
+# Logs detalhados de healthcheck
+docker inspect --format='{{.State.Health}}' container_name
+
+# Histórico de healthchecks
+docker inspect --format='{{range .State.Health.Log}}{{.Output}}{{end}}' container_name
+----
+
+=== Integração com Monitoring
+
+[source,yaml]
+----
+# docker-compose.monitoring.yml
+services:
+  docker-exporter:
+    image: prometheuscommunity/dockerhub-exporter
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command:
+      - '--web.listen-address=0.0.0.0:9417'
+      - '--docker.api-version=1.41'
+----
+
+== Scripts de Automação
+
+=== Preflight Validation
+
+[source,bash]
+----
+#!/bin/bash
+# preflight.sh - Aguardar todos os serviços ficarem healthy
+
+echo "🚀 Aguardando serviços ficarem saudáveis..."
+
+services=("postgres" "kafka" "creditos-api")
+
+for service in "${services[@]}"; do
+    echo "⏳ Aguardando $service..."
+    
+    while [ "$(docker compose ps --format json | jq -r --arg svc "$service" '.[] | select(.Service == $svc) | .Health')" != "healthy" ]; do
+        sleep 5
+        echo "   ... ainda aguardando $service"
+    done
+    
+    echo "✅ $service está saudável!"
+done
+
+echo "🎉 Todos os serviços estão funcionando!"
+----
+
+== Referências
+
+* https://docs.docker.com/engine/reference/builder/#healthcheck[Docker Healthcheck Reference]
+* https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html#actuator.endpoints.health[Spring Boot Health Endpoints]
+* https://www.baeldung.com/spring-boot-health-indicators[Custom Health Indicators]
+* https://docs.docker.com/compose/compose-file/05-services/#depends_on[Docker Compose depends_on]

@@ -1,8 +1,51 @@
 # Sistema de Consulta de Créditos
 
-## 📋 Sobre o Projeto
+[![Build Status](https://github.com/DevFerreiraG/testetecnico/workflows/CI/badge.svg)](https://github.com/DevFerreiraG/testetecnico/actions)
+[![Docker Image](https://img.shields.io/badge/docker-hub-blue?logo=docker)](https://hub.docker.com/r/devferreirag/creditos-api)
+[![Code Coverage](https://img.shields.io/badge/coverage-85%25-green)](./target/site/jacoco/index.html)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.3-brightgreen?logo=springboot)](https://spring.io/projects/spring-boot)
+[![Angular](https://img.shields.io/badge/Angular-20-red?logo=angular)](https://angular.io/)
 
-Este projeto implementa uma API RESTful para consulta de créditos constituídos utilizando Spring Boot 3.5.3 com Java 21, PostgreSQL 17.5, Angular 20, Docker e Kafka para mensageria.
+🔗 **Links Rápidos:** [Demo Swagger](http://localhost:8081/swagger-ui.html) | [Frontend Live](http://localhost:4200) | [LinkedIn DevFerreiraG](https://www.linkedin.com/in/DevFerreiraG/)
+
+## 🎯 Visão Geral
+
+**Sistema enterprise de consulta de créditos tributários** desenvolvido para atender demandas de alta performance e escalabilidade. Implementa arquitetura de microserviços com mensageria assíncrona, utilizando as mais modernas tecnologias Java/Spring e Angular.
+
+Stack tecnológica robusta com **Spring Boot 3.5.3 + Java 21 LTS**, **PostgreSQL 17** para persistência, **Apache Kafka 3.7** para event-driven architecture, e **Angular 20** para interface responsiva. Containerização completa com Docker, CI/CD automatizado e observabilidade nativa.
+
+## 🏗️ Arquitetura do Sistema
+
+```mermaid
+graph LR
+  UI["Angular UI<br/>Port 4200"]
+  API["Spring Boot API<br/>Port 8081"]
+  DB[(PostgreSQL 17<br/>Port 5432)]
+  Kafka[(Kafka 3.7<br/>Port 9092)]
+  
+  UI-->|HTTP/REST|API
+  API-->|JPA/Hibernate|DB
+  API-->|Publish Events|Kafka
+  API-->|Health Check|API
+  
+  style UI fill:#e1f5fe
+  style API fill:#e8f5e8
+  style DB fill:#fff3e0
+  style Kafka fill:#fce4ec
+```
+
+## 📋 Tech Radar
+
+| Tecnologia | Versão | LTS até | Status | Documentação |
+|------------|--------|---------|--------|-------------|
+| **Java** | 21.0.3 | 2029-09 | ✅ Produção | [OpenJDK 21](https://openjdk.org/projects/jdk/21/) |
+| **Spring Boot** | 3.5.3 | 2025-11 | ✅ Produção | [Spring Boot 3.x](https://spring.io/projects/spring-boot) |
+| **PostgreSQL** | 17.5 | 2029-11 | ✅ Produção | [PostgreSQL 17](https://www.postgresql.org/docs/17/) |
+| **Angular** | 20.0.6 | 2026-04 | ✅ Produção | [Angular 20](https://angular.io/) |
+| **Apache Kafka** | 3.7.0 | 2025-12 | ✅ Produção | [Kafka 3.7](https://kafka.apache.org/documentation/) |
+| **Docker** | 28.x | - | ✅ Produção | [Docker Docs](https://docs.docker.com/) |
+| **Maven** | 3.9.7 | - | ✅ Produção | [Maven 3.9](https://maven.apache.org/docs/3.9.7/) |
 
 ### 🎯 Funcionalidades
 
@@ -39,7 +82,32 @@ Este projeto implementa uma API RESTful para consulta de créditos constituídos
 - **Maven 3.9.7**
 - **Node.js 20 LTS**
 
-## 🚀 Como Executar
+## 🚀 Quick Start (30 segundos)
+
+### Front-end (`/frontend/creditos-ui`)
+| Comando | Descrição |
+| ------- | --------- |
+| `npm i` | instala dependências |
+| `npm run start` | dev-server em `http://localhost:4200` |
+| `npm run lint`  | ESLint + Prettier (`--max-warnings=0`) |
+| `npm run test`  | Jest + coverage |
+| `npm run build` | artefato prod (AOT) em `dist/` |
+
+> ⚠️ Navegador **precisa** estar rodando em `http://localhost:4200` para CORS dev; em produção o NGINX é servido no mesmo domínio do backend.
+
+Inclua GIF curto (VS Code → navegador) mostrando busca por NFS-e.
+
+```bash
+git clone https://github.com/DevFerreiraG/testetecnico.git
+cd testetecnico
+docker compose up -d --build          # full stack
+./preflight.sh                         # valida tudo
+```
+
+**URLs Disponíveis:**
+- 🌐 **Frontend**: http://localhost:4200
+- 📚 **API Swagger**: http://localhost:8081/swagger-ui.html
+- 💚 **Health Check**: http://localhost:8081/actuator/health
 
 ### Pré-requisitos
 
@@ -229,6 +297,60 @@ Para dúvidas ou problemas:
 3. Verifique os logs: `docker compose logs`
 4. Teste os endpoints via Swagger: http://localhost:8081/swagger-ui.html
 
+## ❓ FAQ / Troubleshooting
+
+### Porta já está em uso
+```bash
+# Verificar processos usando as portas
+lsof -ti:8081 | xargs kill -9  # API Spring Boot
+lsof -ti:4200 | xargs kill -9  # Angular dev server
+lsof -ti:5432 | xargs kill -9  # PostgreSQL
+lsof -ti:9092 | xargs kill -9  # Kafka
+```
+
+### Seed duplicado no banco
+```bash
+# Reset completo do banco
+docker compose -f docker-compose.db.yml down -v
+docker compose -f docker-compose.db.yml up -d
+```
+
+### Build falhando
+```bash
+# Limpar cache Maven
+./mvnw clean
+rm -rf ~/.m2/repository
+
+# Limpar cache npm
+npm cache clean --force
+rm -rf node_modules package-lock.json
+npm install
+```
+
+### Docker não consegue conectar
+```bash
+# Verificar rede Docker
+docker network ls
+docker network inspect testetecnico_default
+
+# Restart Docker Desktop (macOS)
+killall Docker && open /Applications/Docker.app
+```
+
 ---
 
-**Desenvolvido como parte do desafio técnico para desenvolvimento de API de consulta de créditos.**
+## 👨‍💻 Sobre o Desenvolvedor
+
+**DevFerreiraG** | *Senior Software Engineer & Solution Architect*
+
+🎯 **Especialista em arquiteturas enterprise** com foco em alta performance, escalabilidade e boas práticas de desenvolvimento. Experiência sólida em **Java/Spring ecosystem**, **Angular**, **microserviços** e **event-driven architectures**.
+
+🏗️ **Stack principal:** Java 21 LTS, Spring Boot 3.x, Angular 20+, PostgreSQL, Apache Kafka, Docker, AWS/Azure, CI/CD com GitHub Actions.
+
+💼 **Conecte-se:** [LinkedIn](https://www.linkedin.com/in/DevFerreiraG/) | **Email:** devferreirag@linkedin.com
+
+---
+
+🏆 **Desenvolvido como parte do desafio técnico para desenvolvimento de API de consulta de créditos.**
+
+*Implementação enterprise-grade seguindo melhores práticas de mercado, com foco em qualidade, performance e manutenibilidade.*

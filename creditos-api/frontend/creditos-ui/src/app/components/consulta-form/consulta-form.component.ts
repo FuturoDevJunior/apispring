@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -188,10 +188,12 @@ export class ConsultaFormComponent {
   consultaForm: FormGroup;
   carregando = false;
 
-  constructor(private fb: FormBuilder) {
+  private fb = inject(FormBuilder);
+
+  constructor() {
     this.consultaForm = this.fb.group({
       tipoConsulta: ['nfse', [Validators.required]],
-      valor: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9\-\.\/]+$/)]]
+      valor: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9\-./]+$/)]]
     });
   }
 

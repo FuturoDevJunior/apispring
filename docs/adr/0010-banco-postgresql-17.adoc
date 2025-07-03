@@ -1,0 +1,88 @@
+= ADR-0010: Escolha do PostgreSQL 17 como Banco de Dados Principal
+
+**Status:** Aceito +
+**Data:** 2025-07-03 +
+**Autor:** DevFerreiraG
+
+== Contexto
+
+O sistema de consulta de créditos tributários requer um banco de dados robusto para armazenar informações críticas de NFS-e, créditos constituídos e dados relacionados. A escolha do SGBD impacta diretamente performance, escalabilidade, manutenibilidade e custos operacionais.
+
+== Decisão
+
+Utilizaremos **PostgreSQL 17.5** como banco de dados principal do sistema.
+
+== Alternativas Consideradas
+
+1. **MySQL 8.4** - Amplamente adotado, boa performance
+2. **Oracle Database** - Enterprise, mas custoso
+3. **MongoDB** - NoSQL, mas dados são relacionais
+4. **PostgreSQL 17** - **ESCOLHIDO**
+
+== Justificativa
+
+=== Vantagens do PostgreSQL 17
+
+* **Performance:** Melhorias significativas em queries complexas vs. versão 16
+* **Compliance:** ACID completo, essencial para dados financeiros
+* **JSON nativo:** Suporte a documentos híbridos se necessário
+* **Extensibilidade:** pgcrypto, uuid-ossp para funcionalidades avançadas
+* **LTS:** Suporte até novembro de 2029
+* **Custo:** Open source, sem licenciamento
+
+=== Funcionalidades Específicas Utilizadas
+
+* **JSONB** para metadados de auditoria
+* **UUID** para identificadores únicos
+* **Triggers** para log automático de mudanças
+* **Particionamento** para tabelas históricas
+* **Full-text search** para consultas por descrição
+
+== Consequências
+
+=== Positivas
+* Ecosystem Spring Boot/JPA maduro
+* Tooling robusto (pgAdmin, DBeaver)
+* Performance superior para relatórios
+* Backup/restore confiável
+
+=== Negativas
+* Curva de aprendizado vs. MySQL
+* Configuração de tuning mais complexa
+* Menor adoção em algumas organizações
+
+== Configuração de Produção
+
+[source,yaml]
+----
+# docker-compose.prod.yml
+services:
+  db:
+    image: postgres:17.5-alpine
+    environment:
+      POSTGRES_DB: creditos
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d
+    command: |
+      postgres
+      -c max_connections=200
+      -c shared_buffers=256MB
+      -c effective_cache_size=1GB
+      -c wal_buffers=16MB
+      -c checkpoint_completion_target=0.9
+----
+
+== Monitoramento
+
+* **Métricas:** Conexões ativas, query time, buffer hit ratio
+* **Alertas:** Deadlocks, slow queries > 5s
+* **Backup:** pg_dump diário + WAL shipping
+
+== Referências
+
+* https://www.postgresql.org/docs/17/[PostgreSQL 17 Documentation]
+* https://spring.io/guides/gs/relational-data-access/[Spring Data JPA Guide]
+* https://www.baeldung.com/spring-boot-postgresql[Spring Boot + PostgreSQL Best Practices]

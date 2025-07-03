@@ -1,0 +1,186 @@
+= ADR-0011: Implementação de Mensageria com Apache Kafka 3.7
+
+**Status:** Aceito +
+**Data:** 2025-07-03 +
+**Autor:** DevFerreiraG
+
+== Contexto
+
+O sistema de consulta de créditos tributários necessita de auditoria de consultas, notificações assíncronas e capacidade de integração com sistemas externos. A implementação de mensageria permite desacoplamento, escalabilidade e processamento assíncrono de eventos.
+
+== Decisão
+
+Utilizaremos **Apache Kafka 3.7.0** como plataforma de mensageria principal para event-driven architecture.
+
+== Alternativas Consideradas
+
+1. **RabbitMQ 3.12** - AMQP, fácil configuração
+2. **Apache ActiveMQ** - JMS tradicional
+3. **Amazon SQS** - Managed service, vendor lock-in
+4. **Apache Kafka 3.7** - **ESCOLHIDO**
+
+== Justificativa
+
+=== Vantagens do Kafka 3.7
+
+* **Performance:** >1M mensagens/segundo por broker
+* **Durabilidade:** Replicação configurável, zero data loss
+* **Escalabilidade:** Particionamento horizontal automático
+* **Ecosystem:** Connect, Streams, Schema Registry
+* **Monitoring:** JMX metrics nativo, Kafka Manager
+* **Retention:** Políticas flexíveis (tempo/tamanho)
+
+=== Casos de Uso Implementados
+
+* **Auditoria de consultas:** Cada GET /api/creditos/* → evento
+* **Dead Letter Topic:** Mensagens com falha → reprocessamento manual
+* **Health monitoring:** Status dos consumers/producers
+* **Business events:** Criação/atualização de créditos
+
+== Arquitetura de Tópicos
+
+[source,bash]
+----
+# Tópicos principais
+consulta-creditos              # Eventos de consulta (auditoria)
+consulta-creditos.DLT          # Dead Letter Topic
+business-events                # Eventos de negócio
+system-health                  # Saúde dos serviços
+
+# Configuração
+partitions: 3
+replication-factor: 1 (dev), 3 (prod)
+retention.ms: 604800000 (7 dias)
+----
+
+== Configuração Spring Boot
+
+[source,yaml]
+----
+# application.yml
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 3
+      batch-size: 16384
+      linger-ms: 5
+    consumer:
+      group-id: creditos-api-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+    listener:
+      retry:
+        back-off:
+          fixed-delay: 5s
+          max-attempts: 5
+      ack-mode: manual_immediate
+----
+
+== Implementação de Robustez
+
+=== Dead Letter Topic (DLT)
+
+[source,java]
+----
+@Configuration
+public class KafkaConfig {
+    
+    @Bean
+    public DeadLetterPublishingRecoverer deadLetterRecoverer(
+            KafkaTemplate<String, Object> template) {
+        return new DeadLetterPublishingRecoverer(template,
+            (record, ex) -> new TopicPartition(
+                record.topic() + ".DLT", 
+                record.partition()
+            ));
+    }
+    
+    @RetryableTopic(
+        attempts = "5",
+        backoff = @Backoff(delay = 5000),
+        dltStrategy = DltStrategy.FAIL_ON_ERROR
+    )
+    @KafkaListener(topics = "consulta-creditos")
+    public void processConsulta(ConsultaEvent event) {
+        auditService.registrarConsulta(event);
+    }
+}
+----
+
+=== Health Check
+
+[source,yaml]
+----
+# docker-compose.yml
+services:
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+----
+
+== Consequências
+
+=== Positivas
+* **Auditoria completa:** Rastro de todas as consultas
+* **Escalabilidade:** Adicionar consumers sem impacto
+* **Resiliência:** Retry automático + DLT
+* **Observabilidade:** Métricas detalhadas
+
+=== Negativas
+* **Complexidade:** Configuração inicial mais elaborada
+* **Recursos:** CPU/Memória adicionais
+* **Monitoramento:** Necessário Kafka Manager/UI
+
+== Monitoramento de Produção
+
+[source,yaml]
+----
+# docker-compose.prod.yml
+services:
+  kafka-exporter:
+    image: danielqsj/kafka-exporter:latest
+    command: --kafka.server=kafka:9092
+    ports:
+      - "9308:9308"
+    depends_on:
+      - kafka
+      
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+    ports:
+      - "8080:8080"
+----
+
+=== Métricas Críticas
+
+* **Producer:** throughput, error-rate, batch-size-avg
+* **Consumer:** lag, processing-time, commit-rate
+* **Broker:** disk-usage, network-io, active-connections
+
+== Cenários de Falha
+
+1. **Broker down:** Replication mantém disponibilidade
+2. **Consumer lento:** Backpressure via pause/resume
+3. **Serialization error:** Mensagem vai para DLT
+4. **Network partition:** Retry com backoff exponencial
+
+== Referências
+
+* https://kafka.apache.org/documentation/[Apache Kafka 3.7 Documentation]
+* https://spring.io/projects/spring-kafka[Spring Kafka Reference]
+* https://www.baeldung.com/kafka-spring-dead-letter-queue[Dead Letter Queue Pattern]
+* https://github.com/spring-projects/spring-kafka[Spring Kafka GitHub]

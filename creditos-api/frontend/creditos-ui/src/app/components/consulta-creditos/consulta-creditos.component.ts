@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
@@ -7,7 +7,6 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTableModule } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { HttpClientModule } from '@angular/common/http';
-import { map } from 'rxjs/operators';
 
 import { Credito } from '../../models/credito.model';
 import { CreditoService } from '../../services/credito.service';
@@ -127,7 +126,11 @@ export class ConsultaCreditosComponent {
   mostrarResultados = false;
   displayedColumns: string[] = ['numeroCredito', 'numeroNfse', 'dataConstituicao', 'valorIssqn', 'tipoCredito'];
 
-  constructor(private creditoService: CreditoService) {}
+  private creditoService = inject(CreditoService);
+
+  constructor() {
+    // Empty constructor
+  }
 
   onConsultaRealizada(parametros: ConsultaFormData) {
     this.carregando = true;
@@ -145,7 +148,7 @@ export class ConsultaCreditosComponent {
             this.erro = 'Nenhum crédito encontrado para os parâmetros informados.';
           }
         },
-        error: (error: any) => {
+        error: (error: Error) => {
           console.error('Erro na consulta:', error);
           this.carregando = false;
           this.erro = error.message || 'Erro inesperado. Tente novamente mais tarde.';
@@ -157,7 +160,7 @@ export class ConsultaCreditosComponent {
           this.creditos = [credito];
           this.carregando = false;
         },
-        error: (error: any) => {
+        error: (error: Error) => {
           console.error('Erro na consulta:', error);
           this.carregando = false;
           this.erro = error.message || 'Erro inesperado. Tente novamente mais tarde.';

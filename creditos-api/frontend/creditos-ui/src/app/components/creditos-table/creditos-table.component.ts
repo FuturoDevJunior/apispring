@@ -286,9 +286,9 @@ import { CreditoDTO } from '../../services/consulta.service';
 })
 export class CreditosTableComponent implements OnChanges {
   @Input() creditos: CreditoDTO[] = [];
-  @Input() total: number = 0;
+  @Input() total = 0;
   @Input() dataConsulta: Date | null = null;
-  @Input() carregando: boolean = false;
+  @Input() carregando = false;
   @Input() erro: string | null = null;
 
   displayedColumns: string[] = [

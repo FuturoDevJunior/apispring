@@ -37,7 +37,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,metrics,info,env
+        include: health,prometheus,metrics,info,env
   endpoint:
     health:
       show-details: always
@@ -57,6 +57,11 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     operationsSorter: method
+
+# CORS Production
+app:
+  cors:
+    allowed-origins: https://creditos-ui.example
 
 server:
   port: 8080
