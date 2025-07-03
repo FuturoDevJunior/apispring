@@ -85,12 +85,12 @@ jobs:
     - name: Instalar Angular CLI
       run: |
         cd creditos-api/frontend/creditos-ui
-        npm install -g @angular/cli@20
+        npm install -g @angular/cli@20 || echo "Global install failed, will use npx"
         
     - name: Verificar versão Angular
       run: |
         cd creditos-api/frontend/creditos-ui
-        ng version
+        ng version || npx @angular/cli@20 version
         
     - name: Executar lint
       run: |
@@ -100,7 +100,7 @@ jobs:
     - name: Build produção
       run: |
         cd creditos-api/frontend/creditos-ui
-        ng build --configuration production --no-progress
+        ng build --configuration production --no-progress || npx @angular/cli@20 build --configuration production --no-progress
         
     - name: Upload frontend build artifact
       uses: actions/upload-artifact@v4
