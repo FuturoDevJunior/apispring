@@ -30,12 +30,15 @@ services:
     networks:
       - creditos-network
 
-  # Kafka 3.7.0 (baseado na imagem Confluent)
+# Kafka 3.7.0 (baseado na imagem Confluent)
   kafka:
     image: confluentinc/cp-kafka:7.4.0
     container_name: creditos-kafka
     depends_on:
-      - zookeeper
+      db:
+        condition: service_healthy
+      zookeeper:
+        condition: service_started
     ports:
       - "9092:9092"
     environment:
@@ -47,23 +50,19 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: true
     healthcheck:
-      test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9092"]
+      interval: 20s
+      retries: 10
     networks:
       - creditos-network
 
   # API Spring Boot (será criada posteriormente)
   api:
     build:
-      context: ../backend
+      context: ../backend/creditos-api
       dockerfile: Dockerfile
     container_name: creditos-api
     depends_on:
-      db:
-        condition: service_healthy
       kafka:
         condition: service_healthy
     ports:
@@ -73,6 +72,10 @@ services:
       SPRING_DATASOURCE_USERNAME: dev
       SPRING_DATASOURCE_PASSWORD: dev
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 15s
+      retries: 5
     networks:
       - creditos-network
     profiles:
@@ -81,11 +84,12 @@ services:
   # Frontend Angular (será criado posteriormente)
   frontend:
     build:
-      context: ../frontend
+      context: ../frontend/creditos-ui
       dockerfile: Dockerfile
     container_name: creditos-frontend
     depends_on:
-      - api
+      api:
+        condition: service_healthy
     ports:
       - "80:80"
     networks:
