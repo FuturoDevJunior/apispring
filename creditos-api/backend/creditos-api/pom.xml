@@ -99,6 +99,13 @@
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>
+        
+        <!-- Spring Security Test -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>
@@ -152,17 +159,17 @@
                                     <!-- Avalia o bundle inteiro -->
                                     <element>BUNDLE</element>
                                     <limits>
-                                        <!-- Exige 80% de linhas cobertas -->
+                                        <!-- Exige 90% de linhas cobertas -->
                                         <limit>
                                             <counter>LINE</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.80</minimum>
+                                            <minimum>0.90</minimum>
                                         </limit>
-                                        <!-- Exige 75% de instruções cobertas -->
+                                        <!-- Exige 85% de instruções cobertas -->
                                         <limit>
                                             <counter>INSTRUCTION</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.75</minimum>
+                                            <minimum>0.85</minimum>
                                         </limit>
                                     </limits>
                                 </rule>

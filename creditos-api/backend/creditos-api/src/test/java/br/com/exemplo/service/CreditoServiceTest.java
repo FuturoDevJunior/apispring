@@ -58,7 +58,7 @@ class CreditoServiceTest {
         when(creditoRepository.findByNumeroNfse(numeroNfse)).thenReturn(creditos);
 
         // Act
-        List<CreditoResponseDTO> resultado = creditoService.obterCreditosPorNfse(numeroNfse);
+        List<CreditoResponseDTO> resultado = creditoService.buscarCreditosPorNfse(numeroNfse);
 
         // Assert
         assertNotNull(resultado);
@@ -79,7 +79,7 @@ class CreditoServiceTest {
         when(creditoRepository.findByNumeroNfse(numeroNfse)).thenReturn(Arrays.asList());
 
         // Act
-        List<CreditoResponseDTO> resultado = creditoService.obterCreditosPorNfse(numeroNfse);
+        List<CreditoResponseDTO> resultado = creditoService.buscarCreditosPorNfse(numeroNfse);
 
         // Assert
         assertNotNull(resultado);
@@ -96,32 +96,32 @@ class CreditoServiceTest {
         when(creditoRepository.findByNumeroCredito(numeroCredito)).thenReturn(Optional.of(credito1));
 
         // Act
-        CreditoResponseDTO resultado = creditoService.obterCreditoPorNumero(numeroCredito);
+        java.util.Optional<CreditoResponseDTO> resultado = creditoService.buscarCreditoPorNumero(numeroCredito);
 
         // Assert
-        assertNotNull(resultado);
-        assertEquals("123456", resultado.getNumeroCredito());
-        assertEquals("7891011", resultado.getNumeroNfse());
-        assertEquals(LocalDate.of(2024, 2, 25), resultado.getDataConstituicao());
-        assertEquals(new BigDecimal("1500.75"), resultado.getValorIssqn());
-        assertEquals("ISSQN", resultado.getTipoCredito());
-        assertEquals("Sim", resultado.getSimplesNacional());
+        assertTrue(resultado.isPresent());
+        assertEquals("123456", resultado.get().getNumeroCredito());
+        assertEquals("7891011", resultado.get().getNumeroNfse());
+        assertEquals(LocalDate.of(2024, 2, 25), resultado.get().getDataConstituicao());
+        assertEquals(new BigDecimal("1500.75"), resultado.get().getValorIssqn());
+        assertEquals("ISSQN", resultado.get().getTipoCredito());
+        assertEquals("Sim", resultado.get().getSimplesNacional());
 
         verify(creditoRepository).findByNumeroCredito(numeroCredito);
         verify(consultaPublisher).publishConsultaEvent(any());
     }
 
     @Test
-    void obterCreditoPorNumero_DeveLancarExcecaoQuandoNaoEncontrar() {
+    void buscarCreditoPorNumero_DeveRetornarVazioQuandoNaoEncontrar() {
         // Arrange
         String numeroCredito = "inexistente";
         when(creditoRepository.findByNumeroCredito(numeroCredito)).thenReturn(Optional.empty());
 
-        // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, 
-            () -> creditoService.obterCreditoPorNumero(numeroCredito));
+        // Act
+        java.util.Optional<CreditoResponseDTO> resultado = creditoService.buscarCreditoPorNumero(numeroCredito);
         
-        assertEquals("Crédito não encontrado", exception.getMessage());
+        // Assert
+        assertTrue(resultado.isEmpty());
 
         verify(creditoRepository).findByNumeroCredito(numeroCredito);
         verify(consultaPublisher, never()).publishConsultaEvent(any());
@@ -135,7 +135,7 @@ class CreditoServiceTest {
         when(creditoRepository.findByNumeroNfse(numeroNfse)).thenReturn(creditos);
 
         // Act
-        creditoService.obterCreditosPorNfse(numeroNfse);
+        creditoService.buscarCreditosPorNfse(numeroNfse);
 
         // Assert
         verify(consultaPublisher).publishConsultaEvent(argThat(evento -> 

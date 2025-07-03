@@ -24,6 +24,12 @@ public class ConsultaPublisher {
      */
     public void publishConsultaEvent(ConsultaEventDTO evento) {
         try {
+            // Validação defensiva - evita NPE
+            if (evento == null || evento.getTipoConsulta() == null || evento.getTimestampConsulta() == null) {
+                logger.warn("Evento inválido ou com campos nulos - ignorando publicação");
+                return;
+            }
+            
             String key = evento.getTipoConsulta() + "_" + evento.getTimestampConsulta().toString();
             
             CompletableFuture<SendResult<String, ConsultaEventDTO>> future = 
@@ -34,11 +40,12 @@ public class ConsultaPublisher {
                            evento.getValorConsultado(), result.getRecordMetadata().offset());
             }).exceptionally(failure -> {
                 logger.error("Falha ao enviar evento de consulta: {}", evento.getValorConsultado(), failure);
-                return null;
+                throw new RuntimeException("Kafka indisponível", failure);
             });
             
         } catch (Exception e) {
             logger.error("Erro ao publicar evento de consulta no Kafka", e);
+            throw new RuntimeException("Kafka indisponível", e);
         }
     }
 }

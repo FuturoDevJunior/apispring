@@ -1,3 +1,4 @@
+// © 2025 Gabriel Ferreira | GitHub @FuturoDevJunior | LinkedIn /in/DevFerreiraG
 import { Component } from '@angular/core';
 import { ConsultaCreditosComponent } from './components/consulta-creditos/consulta-creditos.component';
 

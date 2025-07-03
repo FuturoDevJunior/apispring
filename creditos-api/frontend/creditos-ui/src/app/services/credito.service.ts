@@ -1,4 +1,5 @@
-import { Injectable, inject } from '@angular/core';
+// © 2025 Gabriel Ferreira | GitHub @FuturoDevJunior | LinkedIn /in/DevFerreiraG
+import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';

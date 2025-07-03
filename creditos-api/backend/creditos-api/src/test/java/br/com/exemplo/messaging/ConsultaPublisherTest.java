@@ -17,6 +17,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -79,18 +80,21 @@ class ConsultaPublisherTest {
         RuntimeException kafkaException = new RuntimeException("Kafka connection failed");
         future.completeExceptionally(kafkaException);
 
-        when(kafkaTemplate.send(eq(TOPIC_CONSULTA_CREDITOS), anyString(), eq(consultaEventDTO)))
-                .thenReturn(future);
+        // Usando doReturn() conforme recomendação do roteiro
+        doReturn(future).when(kafkaTemplate).send(eq(TOPIC_CONSULTA_CREDITOS), anyString(), eq(consultaEventDTO));
 
-        // Act
+        // Act - O método agora apenas loga, não lança exceção imediatamente
         consultaPublisher.publishConsultaEvent(consultaEventDTO);
-
-        // Assert
+        
+        // Assert - Verifica que o kafka foi chamado
         verify(kafkaTemplate, times(1)).send(
                 eq(TOPIC_CONSULTA_CREDITOS), 
                 anyString(), 
                 eq(consultaEventDTO)
         );
+        
+        // O callback de exceção é executado de forma assíncrona,
+        // então só verificamos se o método foi chamado sem erro direto
     }
 
     @Test
@@ -99,8 +103,13 @@ class ConsultaPublisherTest {
         when(kafkaTemplate.send(eq(TOPIC_CONSULTA_CREDITOS), anyString(), eq(consultaEventDTO)))
                 .thenThrow(new RuntimeException("Unexpected error"));
 
-        // Act
-        consultaPublisher.publishConsultaEvent(consultaEventDTO);
+        // Act & Assert - Verifica se a exceção é relançada
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            consultaPublisher.publishConsultaEvent(consultaEventDTO);
+        });
+        
+        // Verifica a mensagem da exceção
+        assertEquals("Kafka indisponível", exception.getMessage());
 
         // Assert
         verify(kafkaTemplate, times(1)).send(

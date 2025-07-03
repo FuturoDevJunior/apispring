@@ -1,3 +1,7 @@
+/**
+ * © 2025 Gabriel Ferreira | contato.ferreirag@outlook.com
+ * GitHub: FuturoDevJunior | LinkedIn: DevFerreiraG
+ */
 package br.com.exemplo.controller;
 
 import br.com.exemplo.dto.CreditoResponseDTO;
@@ -20,7 +24,7 @@ public class CreditoController {
      */
     @GetMapping("/{numeroNfse}")
     public ResponseEntity<List<CreditoResponseDTO>> getCreditosPorNfse(@PathVariable String numeroNfse) {
-        List<CreditoResponseDTO> creditos = creditoService.obterCreditosPorNfse(numeroNfse);
+        List<CreditoResponseDTO> creditos = creditoService.buscarCreditosPorNfse(numeroNfse);
         return ResponseEntity.ok(creditos);
     }
 
@@ -29,7 +33,12 @@ public class CreditoController {
      */
     @GetMapping("/credito/{numeroCredito}")
     public ResponseEntity<CreditoResponseDTO> getCreditoPorNumero(@PathVariable String numeroCredito) {
-        CreditoResponseDTO credito = creditoService.obterCreditoPorNumero(numeroCredito);
-        return ResponseEntity.ok(credito);
+        java.util.Optional<CreditoResponseDTO> credito = creditoService.buscarCreditoPorNumero(numeroCredito);
+        
+        if (credito.isPresent()) {
+            return ResponseEntity.ok(credito.get());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

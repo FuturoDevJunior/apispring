@@ -1,3 +1,7 @@
+/**
+ * © 2025 Gabriel Ferreira | contato.ferreirag@outlook.com
+ * GitHub: FuturoDevJunior | LinkedIn: DevFerreiraG
+ */
 package br.com.exemplo;
 
 import org.springframework.boot.SpringApplication;

@@ -23,7 +23,7 @@ public class CreditoService {
     /**
      * Obtém uma lista de créditos com base no número da NFS-e.
      */
-    public List<CreditoResponseDTO> obterCreditosPorNfse(String numeroNfse) {
+    public List<CreditoResponseDTO> buscarCreditosPorNfse(String numeroNfse) {
         List<Credito> creditos = creditoRepository.findByNumeroNfse(numeroNfse);
         consultaPublisher.publishConsultaEvent(new ConsultaEventDTO("NUMERO_NFSE", numeroNfse, creditos.size(), "localhost", "API"));
         return creditos.stream().map(this::mapToDTO).collect(Collectors.toList());
@@ -32,10 +32,15 @@ public class CreditoService {
     /**
      * Obtém os detalhes de um crédito com base no número do crédito.
      */
-    public CreditoResponseDTO obterCreditoPorNumero(String numeroCredito) {
-        Credito credito = creditoRepository.findByNumeroCredito(numeroCredito).orElseThrow(() -> new RuntimeException("Crédito não encontrado"));
-        consultaPublisher.publishConsultaEvent(new ConsultaEventDTO("NUMERO_CREDITO", numeroCredito, 1, "localhost", "API"));
-        return mapToDTO(credito);
+    public java.util.Optional<CreditoResponseDTO> buscarCreditoPorNumero(String numeroCredito) {
+        java.util.Optional<Credito> creditoOpt = creditoRepository.findByNumeroCredito(numeroCredito);
+        
+        if (creditoOpt.isPresent()) {
+            consultaPublisher.publishConsultaEvent(new ConsultaEventDTO("NUMERO_CREDITO", numeroCredito, 1, "localhost", "API"));
+            return java.util.Optional.of(mapToDTO(creditoOpt.get()));
+        }
+        
+        return java.util.Optional.empty();
     }
 
     /**

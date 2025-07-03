@@ -7,13 +7,13 @@
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.3-brightgreen?logo=springboot)](https://spring.io/projects/spring-boot)
 [![Angular](https://img.shields.io/badge/Angular-20-red?logo=angular)](https://angular.io/)
 
-🔗 **Links Rápidos:** [Demo Swagger](http://localhost:8081/swagger-ui.html) | [Frontend Live](http://localhost:4200) | [LinkedIn DevFerreiraG](https://www.linkedin.com/in/DevFerreiraG/)
+🔗 **Links Rápidos:** [Demo Swagger](http://localhost:8081/swagger-ui.html) | [Frontend Live](http://localhost:4200) | [Documentação Técnica](./docs/)
 
 ## 🎯 Visão Geral
 
 **Sistema enterprise de consulta de créditos tributários** desenvolvido para atender demandas de alta performance e escalabilidade. Implementa arquitetura de microserviços com mensageria assíncrona, utilizando as mais modernas tecnologias Java/Spring e Angular.
 
-Stack tecnológica robusta com **Spring Boot 3.5.3 + Java 21 LTS**, **PostgreSQL 17** para persistência, **Apache Kafka 3.7** para event-driven architecture, e **Angular 20** para interface responsiva. Containerização completa com Docker, CI/CD automatizado e observabilidade nativa.
+Stack tecnológica robusta com **Spring Boot 3.5.3 + Java 21 LTS**, **PostgreSQL 17** para persistência, **Apache Kafka 3.7** para arquitetura orientada a eventos, e **Angular 20** para interface responsiva. Containerização completa com Docker, CI/CD automatizado e observabilidade nativa.
 
 ## 🏗️ Arquitetura do Sistema
 
@@ -47,15 +47,16 @@ graph LR
 | **Docker** | 28.x | - | ✅ Produção | [Docker Docs](https://docs.docker.com/) |
 | **Maven** | 3.9.7 | - | ✅ Produção | [Maven 3.9](https://maven.apache.org/docs/3.9.7/) |
 
-### 🎯 Funcionalidades
+### 🎯 Funcionalidades Principais
 
 - **API REST** para consulta de créditos por número da NFS-e ou número do crédito
-- **Frontend Angular** responsivo com Material Design
-- **Mensageria Kafka** para auditoria de consultas
-- **Testes automatizados** com JUnit 5 e Mockito
-- **Containerização** completa com Docker
-- **Documentação OpenAPI** (Swagger)
-- **Observabilidade** com Spring Boot Actuator
+- **Frontend Angular** responsivo com Angular Material Design
+- **Mensageria Kafka** para auditoria e rastreamento de consultas
+- **Testes automatizados** com cobertura ≥ 90% (JUnit 5 + Mockito + Testcontainers)
+- **Containerização** completa com Docker e Docker Compose
+- **Documentação OpenAPI 3.0** integrada (Swagger UI)
+- **Observabilidade** nativa com Spring Boot Actuator + Prometheus
+- **Segurança** com Spring Security e validação de entrada
 
 ## 🛠️ Tecnologias Utilizadas
 
@@ -93,9 +94,9 @@ graph LR
 | `npm run test`  | Jest + coverage |
 | `npm run build` | artefato prod (AOT) em `dist/` |
 
-> ⚠️ Navegador **precisa** estar rodando em `http://localhost:4200` para CORS dev; em produção o NGINX é servido no mesmo domínio do backend.
+> ⚠️ **Importante:** Em desenvolvimento, o frontend deve rodar em `http://localhost:4200` para configuração CORS. Em produção, o NGINX serve frontend e backend no mesmo domínio.
 
-Inclua GIF curto (VS Code → navegador) mostrando busca por NFS-e.
+📹 **Demo:** GIF demonstrando busca por NFS-e será incluído após setup completo do ambiente.
 
 ```bash
 git clone https://github.com/DevFerreiraG/testetecnico.git
@@ -339,18 +340,28 @@ killall Docker && open /Applications/Docker.app
 
 ---
 
-## 👨‍💻 Sobre o Desenvolvedor
+<div align="center">
 
-**DevFerreiraG** | *Senior Software Engineer & Solution Architect*
+<h3>Gabriel Ferreira • <em>Full-Stack Engineer</em></h3>
 
-🎯 **Especialista em arquiteturas enterprise** com foco em alta performance, escalabilidade e boas práticas de desenvolvimento. Experiência sólida em **Java/Spring ecosystem**, **Angular**, **microserviços** e **event-driven architectures**.
+<a href="mailto:contato.ferreirag@outlook.com">
+  <img src="https://img.shields.io/badge/e-mail-contato.ferreirag%40outlook.com-blue?logo=gmail&logoColor=white" alt="E-mail">
+</a>
+&nbsp;
+<a href="https://github.com/FuturoDevJunior/apispring">
+  <img src="https://img.shields.io/badge/GitHub-apispring-181717?logo=github" alt="GitHub">
+</a>
+&nbsp;
+<a href="https://www.linkedin.com/in/DevFerreiraG/">
+  <img src="https://img.shields.io/badge/LinkedIn-DevFerreiraG-0A66C2?logo=linkedin&logoColor=white" alt="LinkedIn">
+</a>
 
-🏗️ **Stack principal:** Java 21 LTS, Spring Boot 3.x, Angular 20+, PostgreSQL, Apache Kafka, Docker, AWS/Azure, CI/CD com GitHub Actions.
+<br><sub>Especialista em Java / Spring Boot • Angular • Kafka • Docker & K8s</sub>
 
-💼 **Conecte-se:** [LinkedIn](https://www.linkedin.com/in/DevFerreiraG/) | **Email:** devferreirag@linkedin.com
+</div>
 
 ---
 
-🏆 **Desenvolvido como parte do desafio técnico para desenvolvimento de API de consulta de créditos.**
+🏆 **Sistema Enterprise de Créditos** desenvolvido como showcase técnico de arquitetura moderna e escalável.
 
 *Implementação enterprise-grade seguindo melhores práticas de mercado, com foco em qualidade, performance e manutenibilidade.*
