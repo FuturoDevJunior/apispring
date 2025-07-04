@@ -5,15 +5,7 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-
-### Fixed
-- CI/CD pipeline Docker build paths corrected for frontend and backend
-- Repository name normalization for GHCR OCI compliance
-- Angular CLI command resolution with npx fallback
-- GitHub Actions updated to latest stable versions
-- Container registry permissions and authentication
-- Bundle size validation and artifact upload
+## [v1.0.0] - 2024-01-15
 
 ### 🎯 Sprint 6 - Finalização e Entrega
 - **Observabilidade**: Actuator endpoints habilitados (/health, /metrics)
@@ -22,6 +14,14 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - **CHANGELOG**: Documentação de mudanças seguindo padrão Keep a Changelog
 - **LICENSE**: Licença MIT adicionada
 - **Release**: Tag v1.0.0 criada com release notes
+
+### Fixed
+- CI/CD pipeline Docker build paths corrected for frontend and backend
+- Repository name normalization for GHCR OCI compliance
+- Angular CLI command resolution with npx fallback
+- GitHub Actions updated to latest stable versions
+- Container registry permissions and authentication
+- Bundle size validation and artifact upload
 
 ### 🧪 Sprint 5 - Containerização e CI/CD
 - **Docker**: Containerização completa com multi-stage builds

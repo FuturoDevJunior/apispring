@@ -1,12 +1,12 @@
 # API de Consulta de Créditos Tributários - Desafio Técnico
 
-[![Build Status](https://github.com/DevFerreiraG/testetecnico/workflows/CI/badge.svg)](https://github.com/DevFerreiraG/testetecnico/actions)
+[![Build Status](https://github.com/FuturoDevJunior/apispring/workflows/CI/badge.svg?branch=main)](https://github.com/FuturoDevJunior/apispring/actions)
 [![Code Coverage](https://img.shields.io/badge/coverage-88.6%25-brightgreen)](./target/site/jacoco/index.html)
-[![Java](https://img.shields.io/badge/Java-21%20LTS-orange)](https://openjdk.org/projects/jdk/21/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.3-brightgreen)](https://spring.io/projects/spring-boot)
-[![Angular](https://img.shields.io/badge/Angular-20-red)](https://angular.io/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17.5-blue)](https://www.postgresql.org/)
-[![Apache Kafka](https://img.shields.io/badge/Apache%20Kafka-3.7.0-black)](https://kafka.apache.org/)
+[![Java](https://img.shields.io/badge/Java-21_LTS-ED8B00?logo=openjdk&logoColor=white)](https://openjdk.org/projects/jdk/21/)
+[![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.5.3-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![Angular](https://img.shields.io/badge/Angular-20-DD0031?logo=angular&logoColor=white)](https://angular.io/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17.5-336791?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Apache Kafka](https://img.shields.io/badge/Apache_Kafka-3.7.0-231F20?logo=apachekafka&logoColor=white)](https://kafka.apache.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
 ## Visão Geral
@@ -187,8 +187,8 @@ public class Credito {
 
 ```bash
 # 1. Clone o repositório
-git clone https://github.com/DevFerreiraG/testetecnico.git
-cd testetecnico
+git clone https://github.com/FuturoDevJunior/apispring.git
+cd apispring
 
 # 2. Suba toda a stack
 docker compose up -d --build
@@ -559,11 +559,13 @@ O projeto inclui pipeline completo com:
 
 **Gabriel Ferreira** - *Senior Full-Stack Engineer*
 
-[![Email](https://img.shields.io/badge/Email-contato.ferreirag%40outlook.com-blue?logo=gmail&logoColor=white)](mailto:contato.ferreirag@outlook.com)
-[![GitHub](https://img.shields.io/badge/GitHub-FuturoDevJunior-181717?logo=github)](https://github.com/FuturoDevJunior)
+> Desenvolvedor especializado em arquiteturas enterprise e soluções de alta performance com foco em qualidade e melhores práticas de desenvolvimento.
+
+[![Email](https://img.shields.io/badge/Email-contato.ferreirag%40outlook.com-EA4335?logo=gmail&logoColor=white)](mailto:contato.ferreirag@outlook.com)
+[![GitHub](https://img.shields.io/badge/GitHub-FuturoDevJunior-181717?logo=github&logoColor=white)](https://github.com/FuturoDevJunior)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-DevFerreiraG-0A66C2?logo=linkedin&logoColor=white)](https://www.linkedin.com/in/DevFerreiraG/)
 
-**Especialidades:** Java/Spring Boot • Angular • Kafka • Docker • Kubernetes • Microservices
+**Stack Principal:** Java/Spring Boot • Angular • Apache Kafka • Docker • Kubernetes • Microservices Architecture
 
 ---
 
